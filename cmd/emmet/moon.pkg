@@ -1,0 +1,6 @@
+import {
+  "prowk/moon-emmet" @engine,
+  "moonbitlang/core/env",
+}
+
+pkgtype(kind: "executable")
