@@ -13,9 +13,6 @@ fn Parser::sequence(
   let mut current = roots
   while true {
     if p.peek() == None || p.peek() == Some(')') {
-      if roots.length() == 0 {
-        return Err(p.fail("分组不能为空"))
-      }
       return Err(p.fail("分组不能为空"))
     }
     let node = if p.peek() == Some('(') {
@@ -56,6 +53,9 @@ fn Parser::sequence(
     match p.peek() {
       None | Some(')') => break
       Some('>') => {
+        if node.tag == "" {
+          return Err(p.fail("分组后的子节点运算尚未支持"))
+        }
         p.pos += 1
         if depth + stack.length() >= 64 {
           return Err(p.fail("嵌套超过 64 层"))
@@ -96,9 +96,12 @@ pub fn parse(input : String) -> Result[Array[Element], ExpansionError] {
     })
   }
   let p = Parser::{ chars, pos: 0, count: 0, }
-  let result = p.sequence("", 0)
+  let result = match p.sequence("", 0) {
+    Ok(v) => v
+    Err(e) => return Err(e)
+  }
   if p.pos != chars.length() {
     return Err(p.fail("意外的右括号"))
   }
-  result
+  Ok(result)
 }

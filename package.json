@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "check": "node scripts/check.mjs",
     "build": "moon build bridge --target js --release",
     "demo": "npm run build && node examples/editor.mjs"
   }

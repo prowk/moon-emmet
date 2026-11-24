@@ -1,0 +1,57 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "prowk/moon-emmet"
+
+import {
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn expand(String) -> Result[String, ExpansionError]
+
+pub fn expand_css(String) -> Result[String, ExpansionError]
+
+pub fn expand_for_editor(String, options? : Options) -> Result[Expansion, ExpansionError]
+
+pub fn expand_with_options(String, Options) -> Result[String, ExpansionError]
+
+pub fn parse(String) -> Result[Array[Element], ExpansionError]
+
+// Errors
+
+// Types and methods
+#derive(Eq, @debug.Debug)
+pub(all) struct Element {
+  tag : String
+  mut repeat_count : Int32
+  attributes : Array[(String, String?)]
+  text : String
+  children : Array[Element]
+}
+pub fn Element::equal(Self, Self) -> Bool
+pub fn Element::not_equal(Self, Self) -> Bool
+pub fn Element::to_repr(Self) -> @debug.Repr
+
+pub(all) struct Expansion {
+  html : String
+  tabstops : Array[Int32]
+}
+
+#derive(Eq, @debug.Debug)
+pub(all) struct ExpansionError {
+  offset : Int32
+  message : String
+}
+pub fn ExpansionError::equal(Self, Self) -> Bool
+pub fn ExpansionError::not_equal(Self, Self) -> Bool
+pub fn ExpansionError::to_repr(Self) -> @debug.Repr
+
+pub struct Options {
+  pretty : Bool
+  indent : String
+  xhtml : Bool
+}
+pub fn Options::new(pretty? : Bool, indent? : String, xhtml? : Bool) -> Self
+
+// Type aliases
+
+// Traits
