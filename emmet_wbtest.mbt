@@ -19,9 +19,22 @@ test "选择器、属性、文本与隐式标签" {
   )
   assert_eq(
     expand("input[type=text disabled]"),
-    Ok("<input type=\"text\" disabled></input>"),
+    Ok("<input type=\"text\" disabled>"),
   )
   assert_true(expand("a[href='oops]") is Err(_))
+}
+
+///|
+test "格式化输出与空元素" {
+  assert_eq(
+    expand_with_options("ul>li*2", Options::new(pretty=true)),
+    Ok("<ul>\n  <li></li>\n  <li></li>\n</ul>"),
+  )
+  assert_eq(
+    expand_with_options("img[src=x]", Options::new(xhtml=true)),
+    Ok("<img src=\"x\" />"),
+  )
+  assert_true(expand("input>span") is Err(_))
 }
 
 ///|
