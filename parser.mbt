@@ -1,20 +1,4 @@
 ///|
-fn Parser::element(self : Parser) -> Result[Element, ExpansionError] {
-  let start = self.pos
-  while self.peek() is Some(c) && is_name(c) {
-    self.pos += 1
-  }
-  if start == self.pos {
-    return Err(self.fail("需要标签名"))
-  }
-  self.count += 1
-  if self.count > 4096 {
-    return Err(self.fail("节点数量超过限制"))
-  }
-  Ok({ tag: String::from_array(self.chars[start:self.pos]), children: [], })
-}
-
-///|
 pub fn parse(input : String) -> Result[Array[Element], ExpansionError] {
   let chars = input.to_array()
   if chars.length() == 0 || chars.length() > 8192 {
@@ -25,10 +9,11 @@ pub fn parse(input : String) -> Result[Array[Element], ExpansionError] {
   }
   let p = Parser::{ chars, pos: 0, count: 0, }
   let roots : Array[Element] = []
+  let parents = [""]
   let stack : Array[Array[Element]] = [roots]
   let mut current = roots
   while true {
-    let node = match p.element() {
+    let node = match p.element(parents[parents.length() - 1]) {
       Ok(v) => v
       Err(e) => return Err(e)
     }
@@ -42,6 +27,7 @@ pub fn parse(input : String) -> Result[Array[Element], ExpansionError] {
         }
         current = node.children
         stack.push(current)
+        parents.push(node.tag)
       }
       Some('+') => p.pos += 1
       Some('^') => {
@@ -49,6 +35,7 @@ pub fn parse(input : String) -> Result[Array[Element], ExpansionError] {
           p.pos += 1
           if stack.length() > 1 {
             ignore(stack.pop())
+            ignore(parents.pop())
           }
         }
         current = stack[stack.length() - 1]

@@ -11,6 +11,8 @@ pub(all) struct ExpansionError {
 #derive(Debug, Eq)
 pub(all) struct Element {
   tag : String
+  attributes : Array[(String, String?)]
+  text : String
   children : Array[Element]
 }
 
