@@ -1,6 +1,10 @@
 ///|
 fn render_nodes(nodes : Array[Element], out : StringBuilder) -> Unit {
   for node in nodes {
+    if node.tag == "" {
+      render_nodes(node.children, out)
+      continue
+    }
     out.write_string("<" + node.tag)
     for (key, value) in node.attributes {
       out.write_string(" " + key)

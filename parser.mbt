@@ -1,35 +1,59 @@
 ///|
-pub fn parse(input : String) -> Result[Array[Element], ExpansionError] {
-  let chars = input.to_array()
-  if chars.length() == 0 || chars.length() > 8192 {
-    return Err({
-      offset: 0,
-      message: "输入长度应为 1 到 8192 个字符",
-    })
+fn Parser::sequence(
+  p : Parser,
+  parent : String,
+  depth : Int32,
+) -> Result[Array[Element], ExpansionError] {
+  if depth >= 64 {
+    return Err(p.fail("嵌套超过 64 层"))
   }
-  let p = Parser::{ chars, pos: 0, count: 0, }
   let roots : Array[Element] = []
-  let parents = [""]
+  let parents = [parent]
   let stack : Array[Array[Element]] = [roots]
   let mut current = roots
   while true {
-    let node = match p.element(parents[parents.length() - 1]) {
-      Ok(v) => v
-      Err(e) => return Err(e)
+    if p.peek() == None || p.peek() == Some(')') {
+      if roots.length() == 0 {
+        return Err(p.fail("分组不能为空"))
+      }
+      return Err(p.fail("分组不能为空"))
+    }
+    let node = if p.peek() == Some('(') {
+      p.pos += 1
+      let children = match
+        p.sequence(parents[parents.length() - 1], depth + stack.length()) {
+        Ok(v) => v
+        Err(e) => return Err(e)
+      }
+      if p.peek() != Some(')') {
+        return Err(p.fail("分组括号未闭合"))
+      }
+      p.pos += 1
+      Element::{ tag: "", attributes: [], text: "", children, }
+    } else {
+      match p.element(parents[parents.length() - 1]) {
+        Ok(v) => v
+        Err(e) => return Err(e)
+      }
     }
     current.push(node)
     match p.peek() {
-      None => break
+      None | Some(')') => break
       Some('>') => {
         p.pos += 1
-        if stack.length() >= 64 {
+        if depth + stack.length() >= 64 {
           return Err(p.fail("嵌套超过 64 层"))
         }
         current = node.children
         stack.push(current)
         parents.push(node.tag)
       }
-      Some('+') => p.pos += 1
+      Some('+') => {
+        p.pos += 1
+        if p.peek() == None || p.peek() == Some(')') {
+          return Err(p.fail("运算符后缺少节点"))
+        }
+      }
       Some('^') => {
         while p.peek() == Some('^') {
           p.pos += 1
@@ -44,4 +68,21 @@ pub fn parse(input : String) -> Result[Array[Element], ExpansionError] {
     }
   }
   Ok(roots)
+}
+
+///|
+pub fn parse(input : String) -> Result[Array[Element], ExpansionError] {
+  let chars = input.to_array()
+  if chars.length() == 0 || chars.length() > 8192 {
+    return Err({
+      offset: 0,
+      message: "输入长度应为 1 到 8192 个字符",
+    })
+  }
+  let p = Parser::{ chars, pos: 0, count: 0, }
+  let result = p.sequence("", 0)
+  if p.pos != chars.length() {
+    return Err(p.fail("意外的右括号"))
+  }
+  result
 }

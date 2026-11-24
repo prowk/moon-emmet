@@ -8,7 +8,7 @@ test "标签、子节点、同级和返回父层" {
 
 ///|
 test "非法表达式有位置" {
-  assert_eq(parse("div>"), Err({ offset: 4, message: "需要标签名", }))
+  assert_eq(parse("div>"), Err({ offset: 4, message: "分组不能为空", }))
 }
 
 ///|
@@ -22,4 +22,14 @@ test "选择器、属性、文本与隐式标签" {
     Ok("<input type=\"text\" disabled></input>"),
   )
   assert_true(expand("a[href='oops]") is Err(_))
+}
+
+///|
+test "括号分组保持层级" {
+  assert_eq(
+    expand("div>(header>p)+footer"),
+    Ok("<div><header><p></p></header><footer></footer></div>"),
+  )
+  assert_true(expand("(a+b") is Err(_))
+  assert_true(expand("a+") is Err(_))
 }
