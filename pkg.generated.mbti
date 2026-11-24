@@ -22,6 +22,7 @@ pub fn parse(String) -> Result[Array[Element], ExpansionError]
 #derive(Eq, @debug.Debug)
 pub(all) struct Element {
   tag : String
+  is_text : Bool
   mut repeat_count : Int32
   attributes : Array[(String, String?)]
   text : String

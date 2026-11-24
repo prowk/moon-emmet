@@ -26,7 +26,14 @@ fn Parser::sequence(
         return Err(p.fail("分组括号未闭合"))
       }
       p.pos += 1
-      Element::{ tag: "", repeat_count: 1, attributes: [], text: "", children, }
+      Element::{
+        tag: "",
+        is_text: false,
+        repeat_count: 1,
+        attributes: [],
+        text: "",
+        children,
+      }
     } else {
       match p.element(parents[parents.length() - 1]) {
         Ok(v) => v
@@ -53,8 +60,8 @@ fn Parser::sequence(
     match p.peek() {
       None | Some(')') => break
       Some('>') => {
-        if node.tag == "" {
-          return Err(p.fail("分组后的子节点运算尚未支持"))
+        if node.is_text || node.tag == "" {
+          return Err(p.fail("文本或分组后的子节点运算尚未支持"))
         }
         p.pos += 1
         if depth + stack.length() >= 64 {

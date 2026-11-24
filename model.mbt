@@ -11,6 +11,7 @@ pub(all) struct ExpansionError {
 #derive(Debug, Eq)
 pub(all) struct Element {
   tag : String
+  is_text : Bool
   mut repeat_count : Int32
   attributes : Array[(String, String?)]
   text : String

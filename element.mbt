@@ -12,6 +12,24 @@ fn Parser::element(
   self : Parser,
   parent : String,
 ) -> Result[Element, ExpansionError] {
+  if self.peek() == Some('{') {
+    let text = match self.read_text() {
+      Ok(v) => v
+      Err(e) => return Err(e)
+    }
+    self.count += 1
+    if self.count > 4096 {
+      return Err(self.fail("节点数量超过限制"))
+    }
+    return Ok({
+      tag: "",
+      is_text: true,
+      repeat_count: 1,
+      attributes: [],
+      text,
+      children: [],
+    })
+  }
   let name = self.name()
   if name == "" &&
     self.peek() != Some('.') &&
@@ -71,7 +89,14 @@ fn Parser::element(
   if self.count > 4096 {
     return Err(self.fail("节点数量超过限制"))
   }
-  Ok({ tag, repeat_count: 1, attributes: attrs, text, children: [], })
+  Ok({
+    tag,
+    is_text: false,
+    repeat_count: 1,
+    attributes: attrs,
+    text,
+    children: [],
+  })
 }
 
 ///|

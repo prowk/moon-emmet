@@ -51,12 +51,20 @@ fn Renderer::nodes(
   nodes : Array[Element],
   depth : Int32,
   index : Int32,
+  inline : Bool,
 ) -> Result[Unit, ExpansionError] {
   for node in nodes {
     for iteration in 1..<=node.repeat_count {
       let index = if node.repeat_count > 1 { iteration } else { index }
+      if node.is_text {
+        if self.collect_stops && node.text == "" {
+          self.stops.push(self.length)
+        }
+        self.write(escape_html(numbered(node.text, index)))
+        continue
+      }
       if node.tag == "" {
-        match self.nodes(node.children, depth, index) {
+        match self.nodes(node.children, depth, index, inline) {
           Ok(_) => ()
           Err(e) => return Err(e)
         }
@@ -69,7 +77,9 @@ fn Renderer::nodes(
           message: "空元素不能包含文本或子节点",
         })
       }
-      self.line(depth)
+      if !inline {
+        self.line(depth)
+      }
       self.write("<" + tag)
       for (key, value) in node.attributes {
         self.write(" " + key)
@@ -90,11 +100,12 @@ fn Renderer::nodes(
         self.stops.push(self.length)
       }
       self.write(escape_html(numbered(node.text, index)))
-      match self.nodes(node.children, depth + 1, index) {
+      let child_inline = inline || node.text != "" || has_text(node.children)
+      match self.nodes(node.children, depth + 1, index, child_inline) {
         Ok(_) => ()
         Err(e) => return Err(e)
       }
-      if node.children.length() > 0 {
+      if node.children.length() > 0 && !child_inline {
         self.line(depth)
       }
       self.write("</" + tag + ">")
@@ -137,7 +148,7 @@ fn render_expansion(
     collect_stops,
     stops: [],
   }
-  match renderer.nodes(nodes, 0, 1) {
+  match renderer.nodes(nodes, 0, 1, false) {
     Err(e) => Err(e)
     Ok(_) =>
       if renderer.overflow {
@@ -162,4 +173,10 @@ pub fn expand_with_options(
     Ok(v) => Ok(v.html)
     Err(e) => Err(e)
   }
+}
+
+///|
+/// 混合内容不能插入格式化空白，否则会改变段落的文本内容。
+fn has_text(nodes : Array[Element]) -> Bool {
+  nodes.any(node => node.is_text || (node.tag == "" && has_text(node.children)))
 }

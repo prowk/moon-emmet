@@ -76,3 +76,13 @@ test "CSS 缩写和值单位" {
   assert_eq(expand_css("mt-2r+op0.5"), Ok("margin-top: -2rem;\nopacity: 0.5;"))
   assert_true(expand_css("unknown10") is Err(_))
 }
+
+///|
+test "纯文本节点和混合内容保持空白" {
+  let source = "p>{Click }+a[href=x]{here}+{ to continue}"
+  let expected = Ok("<p>Click <a href=\"x\">here</a> to continue</p>")
+  assert_eq(expand(source), expected)
+  assert_eq(expand_with_options(source, Options::new(pretty=true)), expected)
+  assert_eq(expand("{你好<&}"), Ok("你好&lt;&amp;"))
+  assert_true(expand("{text}>div") is Err(_))
+}
