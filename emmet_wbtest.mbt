@@ -58,3 +58,11 @@ test "重复子树、分组与编号" {
   assert_eq(expand("(b+i)*2"), Ok("<b></b><i></i><b></b><i></i>"))
   assert_true(expand("div*1000>span*1000") is Err(_))
 }
+
+///|
+test "编辑器光标按最终输出 UTF16 定位" {
+  let result = expand_for_editor("p{兔😀}+a[href='']")
+  guard result is Ok(value) else { fail("应当成功") }
+  assert_eq(value.html, "<p>兔😀</p><a href=\"\"></a>")
+  assert_eq(value.tabstops, [19, 21])
+}

@@ -18,6 +18,8 @@ priv struct Renderer {
   out : StringBuilder
   options : Options
   mut length : Int32
+  collect_stops : Bool
+  stops : Array[Int32]
   mut overflow : Bool
 }
 
@@ -72,7 +74,11 @@ fn Renderer::nodes(
       for (key, value) in node.attributes {
         self.write(" " + key)
         if value is Some(v) {
-          self.write("=\"" + escape_html(numbered(v, index)) + "\"")
+          self.write("=\"")
+          if self.collect_stops && v == "" {
+            self.stops.push(self.length)
+          }
+          self.write(escape_html(numbered(v, index)) + "\"")
         }
       }
       if is_void(tag) {
@@ -80,6 +86,9 @@ fn Renderer::nodes(
         continue
       }
       self.write(">")
+      if self.collect_stops && node.text == "" && node.children.length() == 0 {
+        self.stops.push(self.length)
+      }
       self.write(escape_html(numbered(node.text, index)))
       match self.nodes(node.children, depth + 1, index) {
         Ok(_) => ()
@@ -101,10 +110,11 @@ fn Renderer::nodes(
 }
 
 ///|
-pub fn expand_with_options(
+fn render_expansion(
   input : String,
   options : Options,
-) -> Result[String, ExpansionError] {
+  collect_stops : Bool,
+) -> Result[Expansion, ExpansionError] {
   if options.indent.length() > 8 ||
     options.indent.to_array().any(c => c != ' ' && c != '\t') {
     return Err({
@@ -124,6 +134,8 @@ pub fn expand_with_options(
     options,
     length: 0,
     overflow: false,
+    collect_stops,
+    stops: [],
   }
   match renderer.nodes(nodes, 0, 1) {
     Err(e) => Err(e)
@@ -131,7 +143,7 @@ pub fn expand_with_options(
       if renderer.overflow {
         Err({ offset: 0, message: "输出超过 262144 个 UTF-16 单元", })
       } else {
-        Ok(renderer.out.to_string())
+        Ok({ html: renderer.out.to_string(), tabstops: renderer.stops, })
       }
   }
 }
@@ -139,4 +151,15 @@ pub fn expand_with_options(
 ///|
 pub fn expand(input : String) -> Result[String, ExpansionError] {
   expand_with_options(input, Options::new())
+}
+
+///|
+pub fn expand_with_options(
+  input : String,
+  options : Options,
+) -> Result[String, ExpansionError] {
+  match render_expansion(input, options, false) {
+    Ok(v) => Ok(v.html)
+    Err(e) => Err(e)
+  }
 }
