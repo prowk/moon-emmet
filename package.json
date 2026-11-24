@@ -1,0 +1,9 @@
+{
+  "name": "moon-emmet-dev",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "moon build bridge --target js --release",
+    "demo": "npm run build && node examples/editor.mjs"
+  }
+}
