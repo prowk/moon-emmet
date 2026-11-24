@@ -21,6 +21,7 @@
 分组以空 tag 的容器表示；独立文本节点同时带 is_text=true。格式化模式不会向混合内容插入额外空白。属性按 HTML 名称忽略大小写去重，后来的值覆盖旧值；class 按输入顺序合并去重。
 
 与上游的刻意边界：文本与属性值转义后输出，不提供原始 HTML 插值。a/img/input/form 带常用默认属性，显式值优先；支持 bq、btn、input:text/email/password/checkbox/radio/submit 别名。
+CSS 的 z-index 只接受无单位整数，opacity 只接受无单位数值或百分比；padding/width/height/font-size/line-height 拒绝负值。
 此库不负责 HTML 内容安全策略；调用者自行决定允许的标签和属性。
 
 输入最多 8192 个 Unicode 字符，嵌套最多 64 层，展开树最多 4096 个节点（分组也计数），输出最多 262144 个 UTF-16 单元。

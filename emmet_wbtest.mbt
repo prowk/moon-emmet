@@ -75,6 +75,10 @@ test "CSS 缩写和值单位" {
   )
   assert_eq(expand_css("mt-2r+op0.5"), Ok("margin-top: -2rem;\nopacity: 0.5;"))
   assert_true(expand_css("unknown10") is Err(_))
+  assert_true(expand_css("z1.5") is Err(_))
+  assert_true(expand_css("op1px") is Err(_))
+  assert_true(expand_css("p-2") is Err(_))
+  assert_eq(expand_css("z-1+op50p"), Ok("z-index: -1;\nopacity: 50%;"))
 }
 
 ///|

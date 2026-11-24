@@ -81,6 +81,25 @@ pub fn expand_css(input : String) -> Result[String, ExpansionError] {
         _ => return Err({ offset: pos, message: "不支持的 CSS 单位", })
       }
     }
+    if key == "z" && (unit != "" || number.contains(".")) {
+      return Err({ offset: start, message: "z-index 只接受无单位整数", })
+    }
+    if key == "op" && unit != "" && unit != "%" {
+      return Err({
+        offset: pos,
+        message: "opacity 只接受无单位数值或百分比",
+      })
+    }
+    if (
+        key.has_prefix("p") ||
+        key == "w" ||
+        key == "h" ||
+        key == "fz" ||
+        key == "lh"
+      ) &&
+      value < 0.0 {
+      return Err({ offset: start, message: "该 CSS 属性不接受负值", })
+    }
     result.push(property + ": " + number + unit + ";")
   }
   Ok(result.join("\n"))
