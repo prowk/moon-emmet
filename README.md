@@ -69,7 +69,7 @@ node scripts/check.mjs
 moon info
 ```
 
-10 个关键测试覆盖结构、错误位置、属性文本、分组、重复预算、格式化、Unicode 光标和 CSS。
+11 个关键测试覆盖结构、错误位置、属性文本、分组、重复预算、格式化、Unicode 光标和 CSS。
 检查脚本执行 Wasm-GC/JS 测试、JS 构建与示例，CI 在 push/PR 时运行同一入口。
 
 ## 边界与下一步

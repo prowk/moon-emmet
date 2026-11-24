@@ -30,6 +30,7 @@ fn Parser::sequence(
         tag: "",
         is_text: false,
         repeat_count: 1,
+        explicit_repeat: false,
         attributes: [],
         text: "",
         children,
@@ -55,6 +56,7 @@ fn Parser::sequence(
         return Err(p.fail("重复次数应为 1 到 1000"))
       }
       node.repeat_count = n
+      node.explicit_repeat = true
     }
     current.push(node)
     match p.peek() {

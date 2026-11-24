@@ -1,7 +1,12 @@
 ///|
 fn Parser::name(self : Parser) -> String {
   let start = self.pos
-  while self.peek() is Some(c) && (is_name(c) || c == '$') {
+  while self.peek() is Some(c) &&
+        (
+          is_name(c) ||
+          c == '$' ||
+          (c == '@' && self.pos > start && self.chars[self.pos - 1] == '$')
+        ) {
     self.pos += 1
   }
   String::from_array(self.chars[start:self.pos])
@@ -25,6 +30,7 @@ fn Parser::element(
       tag: "",
       is_text: true,
       repeat_count: 1,
+      explicit_repeat: false,
       attributes: [],
       text,
       children: [],
@@ -103,6 +109,7 @@ fn Parser::element(
     tag,
     is_text: false,
     repeat_count: 1,
+    explicit_repeat: false,
     attributes: attrs,
     text,
     children: [],

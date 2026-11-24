@@ -1,29 +1,4 @@
 ///|
-/// 连续美元符号决定编号宽度，重复子树沿用最近一层的编号。
-fn numbered(value : String, index : Int32) -> String {
-  let chars = value.to_array()
-  let out = StringBuilder()
-  let mut pos = 0
-  while pos < chars.length() {
-    if chars[pos] == '$' {
-      let start = pos
-      while pos < chars.length() && chars[pos] == '$' {
-        pos += 1
-      }
-      let num = index.to_string()
-      for _ in 0..<(pos - start - num.length()).max(0) {
-        out.write_char('0')
-      }
-      out.write_string(num)
-    } else {
-      out.write_char(chars[pos])
-      pos += 1
-    }
-  }
-  out.to_string()
-}
-
-///|
 /// 在真正复制字符串前计算展开规模，避免重复相乘耗尽资源。
 fn expanded_size(nodes : Array[Element], budget : Int32) -> Int32 {
   let mut total = 0
@@ -39,4 +14,57 @@ fn expanded_size(nodes : Array[Element], budget : Int32) -> Int32 {
     total += cost
   }
   total
+}
+
+///|
+/// 编号以最近的显式重复为上下文；基数限制保证转换和反向运算不会溢出。
+fn numbered(
+  value : String,
+  index : Int32,
+  total : Int32,
+) -> Result[String, ExpansionError] {
+  let chars = value.to_array()
+  let out = StringBuilder()
+  let mut pos = 0
+  while pos < chars.length() {
+    if chars[pos] != '$' {
+      out.write_char(chars[pos])
+      pos += 1
+      continue
+    }
+    let start = pos
+    while pos < chars.length() && chars[pos] == '$' {
+      pos += 1
+    }
+    let width = pos - start
+    let mut base = 1
+    let mut reverse = false
+    if pos < chars.length() && chars[pos] == '@' {
+      pos += 1
+      if pos < chars.length() && chars[pos] == '-' {
+        reverse = true
+        pos += 1
+      }
+      let digits = pos
+      let mut number = 0
+      while pos < chars.length() && chars[pos] >= '0' && chars[pos] <= '9' {
+        number = number * 10 + chars[pos].to_int() - 48
+        if number > 1000000 {
+          return Err({ offset: 0, message: "编号基数不能超过 1000000", })
+        }
+        pos += 1
+      }
+      if pos > digits {
+        base = number
+      } else if !reverse {
+        return Err({ offset: 0, message: "编号修饰符后缺少基数", })
+      }
+    }
+    let number = (if reverse { total - index + base } else { index + base - 1 }).to_string()
+    for _ in 0..<(width - number.length()).max(0) {
+      out.write_char('0')
+    }
+    out.write_string(number)
+  }
+  Ok(out.to_string())
 }

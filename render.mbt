@@ -51,26 +51,38 @@ fn Renderer::nodes(
   nodes : Array[Element],
   depth : Int32,
   index : Int32,
+  total : Int32,
   inline : Bool,
 ) -> Result[Unit, ExpansionError] {
   for node in nodes {
     for iteration in 1..<=node.repeat_count {
-      let index = if node.repeat_count > 1 { iteration } else { index }
+      let (index, total) = if node.explicit_repeat {
+        (iteration, node.repeat_count)
+      } else {
+        (index, total)
+      }
       if node.is_text {
         if self.collect_stops && node.text == "" {
           self.stops.push(self.length)
         }
-        self.write(escape_html(numbered(node.text, index)))
+        let text = match numbered(node.text, index, total) {
+          Ok(v) => v
+          Err(e) => return Err(e)
+        }
+        self.write(escape_html(text))
         continue
       }
       if node.tag == "" {
-        match self.nodes(node.children, depth, index, inline) {
+        match self.nodes(node.children, depth, index, total, inline) {
           Ok(_) => ()
           Err(e) => return Err(e)
         }
         continue
       }
-      let tag = numbered(node.tag, index)
+      let tag = match numbered(node.tag, index, total) {
+        Ok(v) => v
+        Err(e) => return Err(e)
+      }
       if is_void(tag) && (node.text != "" || node.children.length() > 0) {
         return Err({
           offset: 0,
@@ -82,13 +94,21 @@ fn Renderer::nodes(
       }
       self.write("<" + tag)
       for (key, value) in node.attributes {
+        let key = match numbered(key, index, total) {
+          Ok(v) => v
+          Err(e) => return Err(e)
+        }
         self.write(" " + key)
         if value is Some(v) {
           self.write("=\"")
           if self.collect_stops && v == "" {
             self.stops.push(self.length)
           }
-          self.write(escape_html(numbered(v, index)) + "\"")
+          let value = match numbered(v, index, total) {
+            Ok(v) => v
+            Err(e) => return Err(e)
+          }
+          self.write(escape_html(value) + "\"")
         }
       }
       if is_void(tag) {
@@ -99,9 +119,13 @@ fn Renderer::nodes(
       if self.collect_stops && node.text == "" && node.children.length() == 0 {
         self.stops.push(self.length)
       }
-      self.write(escape_html(numbered(node.text, index)))
+      let text = match numbered(node.text, index, total) {
+        Ok(v) => v
+        Err(e) => return Err(e)
+      }
+      self.write(escape_html(text))
       let child_inline = inline || node.text != "" || has_text(node.children)
-      match self.nodes(node.children, depth + 1, index, child_inline) {
+      match self.nodes(node.children, depth + 1, index, total, child_inline) {
         Ok(_) => ()
         Err(e) => return Err(e)
       }
@@ -148,7 +172,7 @@ fn render_expansion(
     collect_stops,
     stops: [],
   }
-  match renderer.nodes(nodes, 0, 1, false) {
+  match renderer.nodes(nodes, 0, 1, 1, false) {
     Err(e) => Err(e)
     Ok(_) =>
       if renderer.overflow {

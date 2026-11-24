@@ -98,3 +98,20 @@ test "默认属性、别名和属性覆盖" {
   )
   assert_eq(expand("bq>btn"), Ok("<blockquote><button></button></blockquote>"))
 }
+
+///|
+test "编号基数、反向编号和显式单次重复" {
+  assert_eq(
+    expand("li.item$$@-3*2"),
+    Ok("<li class=\"item04\"></li><li class=\"item03\"></li>"),
+  )
+  assert_eq(
+    expand("ul*2>li{项目$}*1"),
+    Ok("<ul><li>项目1</li></ul><ul><li>项目1</li></ul>"),
+  )
+  assert_eq(
+    expand("div[data-$=v]*2"),
+    Ok("<div data-1=\"v\"></div><div data-2=\"v\"></div>"),
+  )
+  assert_true(expand("li.item$@1000001*2") is Err(_))
+}
