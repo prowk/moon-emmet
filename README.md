@@ -44,6 +44,10 @@ match @engine.expand("ul>li.item$*3") {
 - `expand_for_editor(input)`：返回 HTML 和 UTF-16 光标位置。
 - `expand_css(input)`：返回 CSS 声明。
 
+支持纯文本节点与混合内容，例如 `p>{点击 }+a[href=/docs]{文档}+{ 继续}`；
+常用 a/img/input/form 自动补默认属性，显式值可覆盖；class 自动合并去重。
+`li.item$$@-3*2` 生成 item04、item03，独立的 `*1` 也会重置内部编号。
+
 CLI 支持 `--pretty`、`--xhtml`、`--css`、`--editor`、`--json` 和 `--help`。
 必须将缩写作为一个参数传入，PowerShell 推荐单引号，避免 `$` 被 shell 解释。
 成功退出码 0，展开失败 1，参数错误 2。错误以 JSON 写到标准输出。
