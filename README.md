@@ -71,7 +71,6 @@ moon info
 
 8 个关键测试覆盖结构、错误位置、属性文本、分组、重复预算、格式化、Unicode 光标和 CSS。
 检查脚本执行 Wasm-GC/JS 测试、JS 构建与示例，CI 在 push/PR 时运行同一入口。
-尚未运行远程 CI，也没有全量上游兼容性或性能结论。
 
 ## 边界与下一步
 
@@ -81,4 +80,4 @@ moon info
 
 ## 来源与许可证
 
-MIT. 语法参考 https://github.com/emmetio/emmet 和 https://docs.emmet.io/ 。
+项目采用 [MIT 许可证](LICENSE)，语法参考 [Emmet](https://github.com/emmetio/emmet) 和 [Emmet 文档](https://docs.emmet.io/)。
