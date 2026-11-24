@@ -15,13 +15,13 @@ moon run cmd/emmet -- --editor 'a[href=""]'
 <nav>
   <ul>
     <li class="item1">
-      <a>链接1</a>
+      <a href="">链接1</a>
     </li>
     <li class="item2">
-      <a>链接2</a>
+      <a href="">链接2</a>
     </li>
     <li class="item3">
-      <a>链接3</a>
+      <a href="">链接3</a>
     </li>
   </ul>
 </nav>
@@ -69,13 +69,13 @@ node scripts/check.mjs
 moon info
 ```
 
-9 个关键测试覆盖结构、错误位置、属性文本、分组、重复预算、格式化、Unicode 光标和 CSS。
+10 个关键测试覆盖结构、错误位置、属性文本、分组、重复预算、格式化、Unicode 光标和 CSS。
 检查脚本执行 Wasm-GC/JS 测试、JS 构建与示例，CI 在 push/PR 时运行同一入口。
 
 ## 边界与下一步
 
 这是明确限定范围的初步版本。支持范围、资源限制和差异见 `docs/compatibility.md`。
-下一步优先加入常用默认 snippets、更多 CSS 属性，再根据实际用例增加少量上游对照。
+下一步优先加入更多 snippets 和 CSS 属性，再根据实际用例增加少量上游对照。
 不会在当前版本声称完整兼容 Emmet、自动生成有效的任意 CSS 或具备完整 IDE 功能。
 
 ## 来源与许可证

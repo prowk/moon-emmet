@@ -37,22 +37,35 @@ fn Parser::element(
     self.peek() != Some('[') {
     return Err(self.fail("需要标签名"))
   }
+  let (name, input_type) = match name {
+    "bq" => ("blockquote", None)
+    "btn" => ("button", None)
+    "input:text" => ("input", Some("text"))
+    "input:email" => ("input", Some("email"))
+    "input:password" => ("input", Some("password"))
+    "input:checkbox" => ("input", Some("checkbox"))
+    "input:radio" => ("input", Some("radio"))
+    "input:submit" => ("input", Some("submit"))
+    _ => (name, None)
+  }
   let tag = if name != "" {
     name
   } else {
     match parent {
       "ul" | "ol" => "li"
       "tr" => "td"
-      "table" | "tbody" => "tr"
-      "select" => "option"
+      "table" | "tbody" | "thead" | "tfoot" => "tr"
+      "select" | "optgroup" => "option"
       _ => "div"
     }
   }
   if tag[0] >= '0' && tag[0] <= '9' {
     return Err(self.fail("标签不能以数字开头"))
   }
-  let attrs : Array[(String, String?)] = []
-  let classes : Array[String] = []
+  let attrs = default_attributes(tag)
+  if input_type is Some(kind) {
+    set_attribute(attrs, "type", Some(kind))
+  }
   let mut text = ""
   while true {
     match self.peek() {
@@ -64,9 +77,9 @@ fn Parser::element(
           return Err(self.fail("选择器不能为空"))
         }
         if op == '.' {
-          classes.push(value)
+          set_attribute(attrs, "class", Some(value))
         } else {
-          attrs.push(("id", Some(value)))
+          set_attribute(attrs, "id", Some(value))
         }
       }
       Some('[') =>
@@ -81,9 +94,6 @@ fn Parser::element(
         }
       _ => break
     }
-  }
-  if classes.length() > 0 {
-    attrs.push(("class", Some(classes.join(" "))))
   }
   self.count += 1
   if self.count > 4096 {
@@ -176,7 +186,7 @@ fn Parser::read_attributes(
       }
       value = Some(out.to_string())
     }
-    attrs.push((key, value))
+    set_attribute(attrs, key, value)
     if self.peek() != Some(' ') && self.peek() != Some(']') {
       return Err(self.fail("属性之间需要空格"))
     }

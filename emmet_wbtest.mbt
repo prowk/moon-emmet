@@ -32,7 +32,7 @@ test "格式化输出与空元素" {
   )
   assert_eq(
     expand_with_options("img[src=x]", Options::new(xhtml=true)),
-    Ok("<img src=\"x\" />"),
+    Ok("<img src=\"x\" alt=\"\" />"),
   )
   assert_true(expand("input>span") is Err(_))
 }
@@ -52,7 +52,7 @@ test "重复子树、分组与编号" {
   assert_eq(
     expand("ul>li.item$$*2>a{链接$}"),
     Ok(
-      "<ul><li class=\"item01\"><a>链接1</a></li><li class=\"item02\"><a>链接2</a></li></ul>",
+      "<ul><li class=\"item01\"><a href=\"\">链接1</a></li><li class=\"item02\"><a href=\"\">链接2</a></li></ul>",
     ),
   )
   assert_eq(expand("(b+i)*2"), Ok("<b></b><i></i><b></b><i></i>"))
@@ -85,4 +85,16 @@ test "纯文本节点和混合内容保持空白" {
   assert_eq(expand_with_options(source, Options::new(pretty=true)), expected)
   assert_eq(expand("{你好<&}"), Ok("你好&lt;&amp;"))
   assert_true(expand("{text}>div") is Err(_))
+}
+
+///|
+test "默认属性、别名和属性覆盖" {
+  assert_eq(expand("a"), Ok("<a href=\"\"></a>"))
+  assert_eq(expand("img[src=x]"), Ok("<img src=\"x\" alt=\"\">"))
+  assert_eq(expand("input:email[type=search]"), Ok("<input type=\"search\">"))
+  assert_eq(
+    expand("div.one[class='two one'].three#old[id=new]"),
+    Ok("<div class=\"one two three\" id=\"new\"></div>"),
+  )
+  assert_eq(expand("bq>btn"), Ok("<blockquote><button></button></blockquote>"))
 }
