@@ -66,3 +66,13 @@ test "编辑器光标按最终输出 UTF16 定位" {
   assert_eq(value.html, "<p>兔😀</p><a href=\"\"></a>")
   assert_eq(value.tabstops, [19, 21])
 }
+
+///|
+test "CSS 缩写和值单位" {
+  assert_eq(
+    expand_css("m10+w50p+d:f"),
+    Ok("margin: 10px;\nwidth: 50%;\ndisplay: flex;"),
+  )
+  assert_eq(expand_css("mt-2r+op0.5"), Ok("margin-top: -2rem;\nopacity: 0.5;"))
+  assert_true(expand_css("unknown10") is Err(_))
+}
