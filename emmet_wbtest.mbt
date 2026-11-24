@@ -33,3 +33,15 @@ test "括号分组保持层级" {
   assert_true(expand("(a+b") is Err(_))
   assert_true(expand("a+") is Err(_))
 }
+
+///|
+test "重复子树、分组与编号" {
+  assert_eq(
+    expand("ul>li.item$$*2>a{链接$}"),
+    Ok(
+      "<ul><li class=\"item01\"><a>链接1</a></li><li class=\"item02\"><a>链接2</a></li></ul>",
+    ),
+  )
+  assert_eq(expand("(b+i)*2"), Ok("<b></b><i></i><b></b><i></i>"))
+  assert_true(expand("div*1000>span*1000") is Err(_))
+}

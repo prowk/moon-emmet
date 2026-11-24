@@ -1,21 +1,28 @@
 ///|
-fn render_nodes(nodes : Array[Element], out : StringBuilder) -> Unit {
+fn render_nodes(
+  nodes : Array[Element],
+  out : StringBuilder,
+  index : Int32,
+) -> Unit {
   for node in nodes {
-    if node.tag == "" {
-      render_nodes(node.children, out)
-      continue
-    }
-    out.write_string("<" + node.tag)
-    for (key, value) in node.attributes {
-      out.write_string(" " + key)
-      if value is Some(v) {
-        out.write_string("=\"" + escape_html(v) + "\"")
+    for iteration in 1..<=node.repeat_count {
+      let index = if node.repeat_count > 1 { iteration } else { index }
+      if node.tag == "" {
+        render_nodes(node.children, out, index)
+        continue
       }
+      out.write_string("<" + node.tag)
+      for (key, value) in node.attributes {
+        out.write_string(" " + key)
+        if value is Some(v) {
+          out.write_string("=\"" + escape_html(numbered(v, index)) + "\"")
+        }
+      }
+      out.write_string(">")
+      out.write_string(escape_html(numbered(node.text, index)))
+      render_nodes(node.children, out, index)
+      out.write_string("</" + numbered(node.tag, index) + ">")
     }
-    out.write_string(">")
-    out.write_string(escape_html(node.text))
-    render_nodes(node.children, out)
-    out.write_string("</" + node.tag + ">")
   }
 }
 
@@ -40,7 +47,10 @@ pub fn expand(input : String) -> Result[String, ExpansionError] {
     Ok(v) => v
     Err(e) => return Err(e)
   }
+  if expanded_size(nodes, 4096) > 4096 {
+    return Err({ offset: 0, message: "展开超过 4096 个节点", })
+  }
   let out = StringBuilder()
-  render_nodes(nodes, out)
+  render_nodes(nodes, out, 1)
   Ok(out.to_string())
 }

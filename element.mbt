@@ -71,7 +71,7 @@ fn Parser::element(
   if self.count > 4096 {
     return Err(self.fail("节点数量超过限制"))
   }
-  Ok({ tag, attributes: attrs, text, children: [], })
+  Ok({ tag, repeat_count: 1, attributes: attrs, text, children: [], })
 }
 
 ///|

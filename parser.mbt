@@ -29,12 +29,28 @@ fn Parser::sequence(
         return Err(p.fail("分组括号未闭合"))
       }
       p.pos += 1
-      Element::{ tag: "", attributes: [], text: "", children, }
+      Element::{ tag: "", repeat_count: 1, attributes: [], text: "", children, }
     } else {
       match p.element(parents[parents.length() - 1]) {
         Ok(v) => v
         Err(e) => return Err(e)
       }
+    }
+    if p.peek() == Some('*') {
+      p.pos += 1
+      let mut n = 0
+      let start = p.pos
+      while p.peek() is Some(c) && c >= '0' && c <= '9' {
+        n = n * 10 + c.to_int() - 48
+        p.pos += 1
+        if n > 1000 {
+          return Err(p.fail("重复次数不能超过 1000"))
+        }
+      }
+      if p.pos == start || n == 0 {
+        return Err(p.fail("重复次数应为 1 到 1000"))
+      }
+      node.repeat_count = n
     }
     current.push(node)
     match p.peek() {
