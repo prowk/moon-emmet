@@ -3,6 +3,7 @@ pub struct Options {
   pretty : Bool
   indent : String
   xhtml : Bool
+  snippets : Array[Snippet]
 }
 
 ///|
@@ -10,8 +11,9 @@ pub fn Options::new(
   pretty~ : Bool = false,
   indent~ : String = "  ",
   xhtml~ : Bool = false,
+  snippets~ : Array[Snippet] = [],
 ) -> Options {
-  { pretty, indent, xhtml, }
+  { pretty, indent, xhtml, snippets: snippets.copy(), }
 }
 
 ///|

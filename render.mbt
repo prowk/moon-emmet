@@ -157,7 +157,7 @@ fn render_expansion(
       message: "缩进只能是最多 8 个空格或制表符",
     })
   }
-  let nodes = match parse(input) {
+  let nodes = match parse(input, snippets=options.snippets) {
     Ok(v) => v
     Err(e) => return Err(e)
   }

@@ -43,16 +43,10 @@ fn Parser::element(
     self.peek() != Some('[') {
     return Err(self.fail("需要标签名"))
   }
-  let (name, input_type) = match name {
-    "bq" => ("blockquote", None)
-    "btn" => ("button", None)
-    "input:text" => ("input", Some("text"))
-    "input:email" => ("input", Some("email"))
-    "input:password" => ("input", Some("password"))
-    "input:checkbox" => ("input", Some("checkbox"))
-    "input:radio" => ("input", Some("radio"))
-    "input:submit" => ("input", Some("submit"))
-    _ => (name, None)
+  let snippet = find_snippet(name, self.snippets)
+  let name = match snippet {
+    Some(s) => s.tag
+    None => name
   }
   let tag = if name != "" {
     name
@@ -69,10 +63,15 @@ fn Parser::element(
     return Err(self.fail("标签不能以数字开头"))
   }
   let attrs = default_attributes(tag)
-  if input_type is Some(kind) {
-    set_attribute(attrs, "type", Some(kind))
+  if snippet is Some(s) {
+    for (key, value) in s.attributes {
+      set_attribute(attrs, key, value)
+    }
   }
-  let mut text = ""
+  let mut text = match snippet {
+    Some(s) => s.text
+    None => ""
+  }
   while true {
     match self.peek() {
       Some('.') | Some('#') => {

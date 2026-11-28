@@ -14,7 +14,7 @@ pub fn expand_for_editor(String, options? : Options) -> Result[Expansion, Expans
 
 pub fn expand_with_options(String, Options) -> Result[String, ExpansionError]
 
-pub fn parse(String) -> Result[Array[Element], ExpansionError]
+pub fn parse(String, snippets? : Array[Snippet]) -> Result[Array[Element], ExpansionError]
 
 // Errors
 
@@ -51,8 +51,17 @@ pub struct Options {
   pretty : Bool
   indent : String
   xhtml : Bool
+  snippets : Array[Snippet]
 }
-pub fn Options::new(pretty? : Bool, indent? : String, xhtml? : Bool) -> Self
+pub fn Options::new(pretty? : Bool, indent? : String, xhtml? : Bool, snippets? : Array[Snippet]) -> Self
+
+pub struct Snippet {
+  name : String
+  tag : String
+  attributes : Array[(String, String?)]
+  text : String
+}
+pub fn Snippet::new(String, String, attributes? : Array[(String, String?)], text? : String) -> Self
 
 // Type aliases
 

@@ -96,7 +96,14 @@ fn Parser::sequence(
 }
 
 ///|
-pub fn parse(input : String) -> Result[Array[Element], ExpansionError] {
+pub fn parse(
+  input : String,
+  snippets~ : Array[Snippet] = [],
+) -> Result[Array[Element], ExpansionError] {
+  match validate_snippets(snippets) {
+    Err(e) => return Err(e)
+    Ok(_) => ()
+  }
   let chars = input.to_array()
   if chars.length() == 0 || chars.length() > 8192 {
     return Err({
@@ -104,7 +111,7 @@ pub fn parse(input : String) -> Result[Array[Element], ExpansionError] {
       message: "输入长度应为 1 到 8192 个字符",
     })
   }
-  let p = Parser::{ chars, pos: 0, count: 0, }
+  let p = Parser::{ chars, snippets, pos: 0, count: 0, }
   let result = match p.sequence("", 0) {
     Ok(v) => v
     Err(e) => return Err(e)

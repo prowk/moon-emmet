@@ -119,3 +119,38 @@ test "编号基数、反向编号和显式单次重复" {
   )
   assert_true(expand("li.item$@1000001*2") is Err(_))
 }
+
+///|
+test "自定义模板覆盖内置且显式属性最后生效" {
+  let snippets = [
+    Snippet::new("card", "aside"),
+    Snippet::new("card", "article", attributes=[
+      ("class", Some("card")),
+      ("title", Some("默认")),
+    ]),
+    Snippet::new("btn", "button", attributes=[("type", Some("button"))]),
+  ]
+  let options = Options::new(snippets~)
+  assert_eq(
+    expand_with_options("card.active[title=覆盖]*2>btn", options),
+    Ok(
+      "<article class=\"card active\" title=\"覆盖\"><button type=\"button\"></button></article><article class=\"card active\" title=\"覆盖\"><button type=\"button\"></button></article>",
+    ),
+  )
+  assert_eq(
+    expand("link:css[href=app.css]+form:post>input:search"),
+    Ok(
+      "<link rel=\"stylesheet\" href=\"app.css\"><form action=\"\" method=\"post\"><input type=\"search\"></form>",
+    ),
+  )
+  assert_true(parse("x", snippets=[Snippet::new("x", "bad<tag")]) is Err(_))
+  assert_true(
+    expand_with_options(
+      "x",
+      Options::new(snippets=[
+        Snippet::new("x", "div", attributes=[("bad attr", None)]),
+      ]),
+    )
+    is Err(_),
+  )
+}

@@ -22,6 +22,7 @@ pub(all) struct Element {
 ///|
 priv struct Parser {
   chars : Array[Char]
+  snippets : Array[Snippet]
   mut pos : Int32
   mut count : Int32
 }
