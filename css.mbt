@@ -172,7 +172,7 @@ fn css_number(
     }
     pos += 1
   }
-  if digits == 0 || dots > 1 {
+  if digits == 0 || dots > 1 || (pos > start && chars[pos - 1] == '.') {
     return Err({ offset: offset + start, message: "CSS 数值无效", })
   }
   let number = String::from_array(chars[start:pos])

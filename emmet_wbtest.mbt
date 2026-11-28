@@ -96,7 +96,7 @@ test "CSS 多值颜色与完整输入的错误位置" {
   for
     input in [
       "p1--2", "m1-2-3-4-5", "m1-", "w1-2", "c#12xz", "bgc#12345", "op.5px", "p1..2",
-      "w1e2", "m1++p2",
+      "w1e2", "m1++p2", "m1.",
     ] {
     assert_true(expand_css(input) is Err(_), msg=input)
   }

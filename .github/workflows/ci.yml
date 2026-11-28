@@ -14,3 +14,4 @@ jobs:
           node-version: '22'
       - run: npm ci --ignore-scripts
       - run: node scripts/check.mjs
+      - run: python scripts/check-package.py
