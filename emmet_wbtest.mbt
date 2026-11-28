@@ -82,6 +82,30 @@ test "CSS 缩写和值单位" {
 }
 
 ///|
+test "CSS 多值颜色与完整输入的错误位置" {
+  assert_eq(
+    expand_css("m10-20+p0-1e-2r-3p"),
+    Ok("margin: 10px 20px;\npadding: 0 1em 2rem 3%;"),
+  )
+  assert_eq(expand_css("m-10--20-0--.5r"), Ok("margin: -10px -20px 0 -.5rem;"))
+  assert_eq(
+    expand_css("c#F+bgc#e0+bdc#12345678"),
+    Ok("color: #fff;\nbackground-color: #e0e0e0;\nborder-color: #12345678;"),
+  )
+  for
+    input in [
+      "p1--2", "m1-2-3-4-5", "m1-", "w1-2", "c#12xz", "bgc#12345", "op.5px", "p1..2",
+      "m1e2", "m1++p2",
+    ] {
+    assert_true(expand_css(input) is Err(_), msg=input)
+  }
+  assert_eq(
+    expand_css("m10+p-2"),
+    Err({ offset: 5, message: "该 CSS 属性不接受负值", }),
+  )
+}
+
+///|
 test "纯文本节点和混合内容保持空白" {
   let source = "p>{Click }+a[href=x]{here}+{ to continue}"
   let expected = Ok("<p>Click <a href=\"x\">here</a> to continue</p>")
