@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Moon Emmet 编辑器示例</title>
+<style>
+  body { max-width: 880px; margin: 40px auto; padding: 0 20px; font: 16px/1.6 system-ui, sans-serif; color: #17233a; background: #f7f9fc; }
+  h1 { font-size: 28px; } label { display: block; margin-top: 16px; }
+  textarea, input, pre { width: 100%; box-sizing: border-box; font: 15px/1.6 ui-monospace, monospace; padding: 12px; border: 1px solid #b5c1d0; border-radius: 6px; background: white; }
+  textarea { min-height: 190px; } pre { min-height: 70px; white-space: pre-wrap; overflow-wrap: anywhere; }
+  button, select { font: inherit; padding: 7px 12px; margin: 10px 8px 0 0; } .inline { display: inline-block; }
+  .inline input { width: auto; } #status { min-height: 2em; }
+</style>
+<h1>Moon Emmet 编辑器示例</h1>
+<p>输入缩写查看结果，或在编辑区域选中一段缩写后展开。所有生成结果均作为文本显示。</p>
+<label for="source">缩写</label>
+<input id="source" value="ul>li.item$*3>a{链接$}">
+<select id="mode" aria-label="输出模式"><option value="editor">HTML 与光标</option><option value="css">CSS</option></select>
+<label class="inline"><input id="pretty" type="checkbox">格式化 HTML</label>
+<button id="preview">查看结果</button>
+<pre id="output" aria-label="展开结果"></pre>
+<label for="document">编辑区域</label>
+<textarea id="document" spellcheck="false">说明😀
+a[href=""]
+结束</textarea>
+<button id="replace">展开选中缩写</button><button id="next" disabled>下一个占位</button>
+<p id="status" role="status" aria-live="polite"></p>
+<script type="module" src="./editor-ui.mjs"></script>
+</html>

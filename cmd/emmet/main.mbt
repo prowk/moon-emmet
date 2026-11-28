@@ -1,7 +1,7 @@
 ///|
 /// 错误也以 JSON 写到标准输出，退出码区分用法错误和展开错误。
-fn error(message : String, code : Int32) -> Unit {
-  let value : Json = { "error": message }
+fn error(message : String, code : Int32, offset~ : Int32 = 0) -> Unit {
+  let value : Json = { "ok": false, "error": message, "offset": offset }
   println(value.stringify())
   @env.exit(code)
 }
@@ -19,7 +19,7 @@ fn main {
     match args[i] {
       "--help" | "-h" => {
         println(
-          "Moon Emmet 0.1.0\n用法: emmet [--pretty] [--xhtml] [--css | --editor] [--json] '缩写'\n错误以 JSON 输出；退出码: 0 成功，1 展开失败，2 参数错误。",
+          "Moon Emmet 0.1.0 MVP（未发布）\n用法: emmet [--pretty] [--xhtml] [--css | --editor] [--json] '缩写'\n示例: --css 'm10-20+c#fff'\n错误以 JSON 输出，offset 为 Unicode 字符序号；退出码: 0 成功，1 展开失败，2 参数错误。",
         )
         return
       }
@@ -50,12 +50,12 @@ fn main {
     match @engine.expand_css(source) {
       Ok(value) =>
         if json {
-          let result : Json = { "css": value }
+          let result : Json = { "ok": true, "css": value }
           println(result.stringify())
         } else {
           println(value)
         }
-      Err(e) => error(e.message, 1)
+      Err(e) => error(e.message, 1, offset=e.offset)
     }
   } else if editor {
     match
@@ -64,24 +64,26 @@ fn main {
         options=@engine.Options::new(pretty~, xhtml~),
       ) {
       Ok(value) => {
-        let result : Json = { "html": value.html, "tabstops": value.tabstops }
+        let result : Json = {
+          "ok": true,
+          "html": value.html,
+          "tabstops": value.tabstops,
+        }
         println(result.stringify())
       }
-      Err(e) =>
-        error(e.message + "（字符位置 " + e.offset.to_string() + "）", 1)
+      Err(e) => error(e.message, 1, offset=e.offset)
     }
   } else {
     match
       @engine.expand_with_options(source, @engine.Options::new(pretty~, xhtml~)) {
       Ok(value) =>
         if json {
-          let result : Json = { "html": value }
+          let result : Json = { "ok": true, "html": value }
           println(result.stringify())
         } else {
           println(value)
         }
-      Err(e) =>
-        error(e.message + "（字符位置 " + e.offset.to_string() + "）", 1)
+      Err(e) => error(e.message, 1, offset=e.offset)
     }
   }
 }

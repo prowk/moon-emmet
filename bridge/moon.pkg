@@ -1,9 +1,12 @@
 import {
   "prowk/moon-emmet" @engine,
+  "moonbitlang/core/json",
 }
 
 supported_targets = "+js"
 
 options(
-  link: { "js": { "exports": [ "html", "css", "editor" ], "format": "esm" } },
+  link: {
+    "js": { "exports": [ "html", "css", "editor", "expand" ], "format": "esm" },
+  },
 )
