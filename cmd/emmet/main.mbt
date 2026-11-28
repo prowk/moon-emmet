@@ -7,6 +7,19 @@ fn error(message : String, code : Int32, offset~ : Int32 = 0) -> Unit {
 }
 
 ///|
+/// Node 的 argv 同时包含解释器与脚本路径，Wasm argv 仅包含程序名。
+#cfg(target="js")
+fn argument_start() -> Int32 {
+  2
+}
+
+///|
+#cfg(not(target="js"))
+fn argument_start() -> Int32 {
+  1
+}
+
+///|
 fn main {
   let args = @env.args()
   let mut input : String? = None
@@ -15,7 +28,7 @@ fn main {
   let mut css = false
   let mut editor = false
   let mut json = false
-  for i in 1..<args.length() {
+  for i in argument_start()..<args.length() {
     match args[i] {
       "--help" | "-h" => {
         println(

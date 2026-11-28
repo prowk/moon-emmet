@@ -117,7 +117,7 @@ fn css_declaration(
     if pos == chars.length() {
       break
     }
-    if chars[pos] != '-' || (key != "m" && key != "p") {
+    if key != "m" && key != "p" {
       return Err({
         offset: offset + pos,
         message: "仅 margin/padding 支持用 - 分隔多值",
@@ -129,8 +129,23 @@ fn css_declaration(
         message: "margin/padding 最多接受四个值",
       })
     }
-    // 消耗分隔符后仍存在的 - 由数值解析器解释为负号。
-    pos += 1
+    let previous = chars[pos - 1]
+    let explicit_unit = (previous >= 'a' && previous <= 'z') || previous == '%'
+    if explicit_unit {
+      // 显式单位已经分隔数值，后续 - 是负号，与 Emmet 的输入方式一致。
+      if chars[pos] != '-' &&
+        chars[pos] != '.' &&
+        !(chars[pos] >= '0' && chars[pos] <= '9') {
+        return Err({ offset: offset + pos, message: "CSS 多值分隔无效", })
+      }
+    } else if chars[pos] == '-' {
+      pos += 1
+    } else {
+      return Err({
+        offset: offset + pos,
+        message: "CSS 多值需要 - 或显式单位分隔",
+      })
+    }
   }
   Ok(property + ": " + values.join(" ") + ";")
 }

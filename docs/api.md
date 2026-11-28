@@ -32,6 +32,6 @@ mode 为 `html`（默认）、`editor` 或 `css`。CSS 模式仅接受 mode，�
 
 ## 编辑区域替换示例
 
-执行 `npm run build` 后，在仓库根目录运行 `python -m http.server 8000`，浏览器打开 `http://localhost:8000/examples/editor.html`。输入缩写查看结果，在编辑区域选中缩写后点击展开，再通过“下一个占位”移动光标。示例不请求网络 API，不把生成文本插入页面 DOM；HTTP 服务仅用于加载本地 ESM。
+在仓库根目录运行 `npm run serve`，浏览器打开 `http://127.0.0.1:8000/examples/editor.html`。输入缩写查看结果，在编辑区域选中缩写后点击展开，再通过“下一个占位”移动光标。示例不请求网络 API，不把生成文本插入页面 DOM；HTTP 服务只开放示例所需的四个文件，提供正确的 ESM MIME 类型。若端口被占用，可先 `npm run build`，再 `node scripts/serve.mjs 8001`。
 
 `examples/editor-adapter.mjs` 导出 `expandSelection(text,start,end,options)` 与 `applyToTextarea(textarea,options)`。前者返回新文本、插入内容、绝对占位位置和新选区；后者通过 `setRangeText` 真正替换 textarea 选区。二者都在失败时保留原文；拒绝从代理对中间切开字符。`npm run demo` 在 Node 中验证同一路径，包括中文、表情、模板、格式化和错误结果。宿主负责选区识别、交互和文件保存。

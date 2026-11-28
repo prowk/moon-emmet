@@ -83,8 +83,9 @@ test "CSS 缩写和值单位" {
 
 ///|
 test "CSS 多值颜色与完整输入的错误位置" {
+  assert_eq(expand_css("m1e-2r"), Ok("margin: 1em -2rem;"))
   assert_eq(
-    expand_css("m10-20+p0-1e-2r-3p"),
+    expand_css("m10-20+p0-1e2r3p"),
     Ok("margin: 10px 20px;\npadding: 0 1em 2rem 3%;"),
   )
   assert_eq(expand_css("m-10--20-0--.5r"), Ok("margin: -10px -20px 0 -.5rem;"))
@@ -95,7 +96,7 @@ test "CSS 多值颜色与完整输入的错误位置" {
   for
     input in [
       "p1--2", "m1-2-3-4-5", "m1-", "w1-2", "c#12xz", "bgc#12345", "op.5px", "p1..2",
-      "m1e2", "m1++p2",
+      "w1e2", "m1++p2",
     ] {
     assert_true(expand_css(input) is Err(_), msg=input)
   }
@@ -177,4 +178,26 @@ test "自定义模板覆盖内置且显式属性最后生效" {
     )
     is Err(_),
   )
+}
+
+///|
+test "资源边界与配置不会返回截断的成功结果" {
+  assert_true(parse("div".repeat(2731)) is Err(_))
+  assert_true(expand("div>".repeat(64) + "span") is Err(_))
+  assert_true(expand("(".repeat(64) + "p" + ")".repeat(64)) is Err(_))
+  assert_true(expand("{1234567890}*1000") is Ok(_))
+  assert_true(expand("p{" + "&".repeat(1000) + "}*100") is Err(_))
+  assert_true(expand_with_options("p", Options::new(indent="bad")) is Err(_))
+  assert_true(
+    expand_with_options(
+      "p",
+      Options::new(snippets=Array::make(129, Snippet::new("p", "p"))),
+    )
+    is Err(_),
+  )
+  let tree = parse("(p>span)*1000")
+  guard tree is Ok(nodes) else { fail("应返回紧凑树") }
+  assert_eq(nodes.length(), 1)
+  assert_eq(nodes[0].children.length(), 1)
+  assert_eq(nodes[0].repeat_count, 1000)
 }
